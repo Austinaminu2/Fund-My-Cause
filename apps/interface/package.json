@@ -10,6 +10,7 @@
     "test": "jest --run",
     "test:vitest": "vitest --run",
     "test:coverage": "vitest --coverage"
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",

@@ -10,6 +10,10 @@
     "build": "npm run build --workspace=apps/interface",
     "lint": "npm run lint --workspace=apps/interface",
     "contracts:build": "cargo build --release --target wasm32-unknown-unknown --manifest-path contracts/crowdfund/Cargo.toml",
-    "contracts:test": "cargo test --workspace"
+    "contracts:test": "cargo test --workspace",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
   }
 }
