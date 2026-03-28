@@ -1,5 +1,4 @@
 import React from "react";
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { Navbar } from "@/components/layout/Navbar";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -10,12 +9,15 @@ import { XlmAmount } from "@/components/ui/XlmAmount";
 import { fetchCampaign } from "@/lib/soroban";
 import { fetchXlmPrice } from "@/lib/price";
 import { CampaignActions } from "./CampaignActions";
+import { CampaignDetailContent } from "./CampaignDetailContent";
 
 // ── SEO ───────────────────────────────────────────────────────────────────────
 
-export async function generateMetadata(
-  { params }: { params: Promise<{ id: string }> }
-): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
   const { id } = await params;
   try {
     const c = await fetchCampaign(id);
@@ -28,17 +30,13 @@ export async function generateMetadata(
   }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-function truncate(addr: string) {
-  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
-}
-
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default async function CampaignDetailPage(
-  { params }: { params: Promise<{ id: string }> }
-) {
+export default async function CampaignDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
 
   let campaign;
@@ -149,6 +147,7 @@ export default async function CampaignDetailPage(
           status={campaign.status}
         />
       </div>
+      <CampaignDetailContent contractId={id} />
     </main>
   );
 }
