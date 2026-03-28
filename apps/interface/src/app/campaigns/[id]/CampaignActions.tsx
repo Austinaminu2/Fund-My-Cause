@@ -8,6 +8,7 @@ import {
   buildWithdrawTx,
   simulateTx,
   submitSignedTx,
+  type CampaignStatus 
 } from "@/lib/soroban";
 import { useToast } from "@/components/ui/Toast";
 
@@ -17,7 +18,7 @@ interface Props {
   deadlinePassed: boolean;
   goalMet: boolean;
   campaignTitle: string;
-  status: "Active" | "Successful" | "Refunded" | "Cancelled";
+  status: CampaignStatus;
 }
 
 type ActionStatus = "idle" | "simulating" | "signing" | "submitting" | "done" | "error";
@@ -37,6 +38,9 @@ export function CampaignActions({
   const [actionStatus, setActionStatus] = useState<ActionStatus>("idle");
   const [actionError, setActionError] = useState("");
   const [estimatedFee, setEstimatedFee] = useState<string | null>(null);
+  const [txStatus, setTxStatus] = useState<
+    "idle" | "pending" | "done" | "error"
+  >("idle");
 
   useEffect(() => {
     if (address) {
@@ -47,7 +51,8 @@ export function CampaignActions({
   }, [address, contractId]);
 
   const isCreator = !!address && address === creator;
-  const canRefund = !!address && deadlinePassed && !goalMet && userContribution > 0;
+  const canRefund =
+    !!address && deadlinePassed && !goalMet && userContribution > 0;
   const canWithdraw = isCreator && status === "Successful";
 
   /**
