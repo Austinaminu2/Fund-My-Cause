@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useWallet } from "@/context/WalletContext";
+import React from "react";
 import { PledgeModal } from "@/components/ui/PledgeModal";
-import { fetchContribution } from "@/lib/soroban";
+import { CampaignStatus } from "./campaignActionsState";
+import { useCampaignActions } from "./useCampaignActions";
 
 interface Props {
   contractId: string;
@@ -11,7 +11,7 @@ interface Props {
   deadlinePassed: boolean;
   goalMet: boolean;
   campaignTitle: string;
-  status: "Active" | "Successful" | "Refunded" | "Cancelled";
+  status: CampaignStatus;
 }
 
 export function CampaignActions({
@@ -22,44 +22,20 @@ export function CampaignActions({
   campaignTitle,
   status,
 }: Props) {
-  const { address, connect, networkMismatch } = useWallet();
-  const [pledging, setPledging] = useState(false);
-  const [userContribution, setUserContribution] = useState(0);
-  const [txStatus, setTxStatus] = useState<"idle" | "pending" | "done" | "error">("idle");
-
-  useEffect(() => {
-    if (address) {
-      fetchContribution(contractId, address)
-        .then(setUserContribution)
-        .catch(() => setUserContribution(0));
-    }
-  }, [address, contractId]);
-
-  const isCreator = !!address && address === creator;
-  const canRefund = !!address && deadlinePassed && !goalMet && userContribution > 0;
-  const canWithdraw = isCreator && status === "Successful";
-
-  async function handleRefund() {
-    setTxStatus("pending");
-    try {
-      // TODO: invoke refund_single via Soroban RPC + Freighter signing
-      await new Promise((r) => setTimeout(r, 1500)); // placeholder
-      setTxStatus("done");
-    } catch {
-      setTxStatus("error");
-    }
-  }
-
-  async function handleWithdraw() {
-    setTxStatus("pending");
-    try {
-      // TODO: invoke withdraw via Soroban RPC + Freighter signing
-      await new Promise((r) => setTimeout(r, 1500)); // placeholder
-      setTxStatus("done");
-    } catch {
-      setTxStatus("error");
-    }
-  }
+  const {
+    address,
+    networkMismatch,
+    pledging,
+    setPledging,
+    userContribution,
+    txStatus,
+    canPledge,
+    canRefund,
+    canWithdraw,
+    handleRefund,
+    handleWithdraw,
+    handlePledgeClick,
+  } = useCampaignActions({ contractId, creator, deadlinePassed, goalMet, status });
 
   if (txStatus === "done") {
     return <p className="text-green-500 dark:text-green-400 text-center py-4">Transaction submitted successfully!</p>;
@@ -69,9 +45,9 @@ export function CampaignActions({
     <>
       <div className="flex flex-col gap-3">
         {/* Pledge — always visible when campaign is active */}
-        {status === "Active" && !deadlinePassed && (
+        {canPledge && (
           <button
-            onClick={() => (address ? setPledging(true) : connect())}
+            onClick={handlePledgeClick}
             disabled={networkMismatch}
             className="w-full py-3 rounded-xl font-medium bg-indigo-600 hover:bg-indigo-500 transition text-white disabled:opacity-50"
           >
